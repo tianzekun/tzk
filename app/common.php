@@ -24,7 +24,6 @@ if (!function_exists('success')) {
     }
 }
 
-
 if (!function_exists('error')) {
     /**
      * @param string $msg 返回消息
@@ -39,7 +38,6 @@ if (!function_exists('error')) {
         return result($data, $msg, $code, $header, $options);
     }
 }
-
 
 if (!function_exists('unauthorized')) {
     /**
@@ -57,6 +55,21 @@ if (!function_exists('unauthorized')) {
     }
 }
 
+if (!function_exists('forbidden')) {
+    /**
+     * 当前操作的用户权限不足
+     * @param string $msg 返回消息
+     * @param array $data 返回的数据主体
+     * @param int $code 状态码
+     * @param array $header 响应头
+     * @param array $options 附加参数
+     * @return Json
+     */
+    function forbidden($msg = 'Forbidden', $data = [], $code = 403, $header = [], $options = []): Json
+    {
+        return result($data, $msg, $code, $header, $options);
+    }
+}
 
 if (!function_exists('error_404')) {
     /**

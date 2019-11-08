@@ -12,6 +12,4 @@ return [
     'uid_key'=>'admin_uid',
     //用户签名的session和cookie的key值
     'sign_key'=>'admin_sign',
-
-
 ];

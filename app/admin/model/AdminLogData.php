@@ -8,24 +8,27 @@ declare (strict_types = 1);
 
 namespace app\admin\model;
 
-use tools\Crypt;
 
+/**
+ * Class AdminLogData
+ * @package app\admin\model
+ * @property int $id ID
+ * @property int $admin_log_id 日志ID
+ * @property string $content 日志数据内容
+ */
 class AdminLogData extends Model
 {
-    protected $name = 'admin_log_data';
 
     public $softDelete = false;
 
-    //关联log
+    /**
+     * 关联日志
+     * @return \think\model\relation\BelongsTo
+     */
     public function adminLog()
     {
-        return $this->belongsTo('app\admin\AdminLog','admin_log_id','id');
+        return $this->belongsTo(AdminLog::class);
     }
 
-    public function getDataAttr($value)
-    {
-        $data = Crypt::decrypt($value, config('app.app_key'));
-        return json_encode(json_decode($data, true), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-    }
     
 }

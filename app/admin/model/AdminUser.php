@@ -20,7 +20,7 @@ use think\model\concern\SoftDelete;
  * @property int create_time 创建时间
  * @property int update_time 更新时间
  * @property int delete_time 删除时间
-
+ * @property mixed role
  */
 class AdminUser extends Model
 {
@@ -130,24 +130,18 @@ class AdminUser extends Model
      * @return mixed
      * @throws \Exception
      */
-    public static function login($param)
+    public  function login($param)
     {
         $username = $param['username'];
         $password = $param['password'];
-        $user     = self::get(['username' => $username]);
+        $user = $this->where('user_name', $username)->find();
         if (!$user) {
             exception('用户不存在');
         }
-
-        if (!password_verify($password, base64_decode($user->password))) {
+        $verify = password_verify($password, base64_decode($user->password));
+        if ($verify) {
             exception('密码错误');
-        }
-
-        if ((int)$user->status !== 1) {
-            exception('用户被冻结');
         }
         return $user;
     }
-
-
 }
