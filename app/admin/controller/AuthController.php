@@ -10,6 +10,7 @@ declare (strict_types=1);
 namespace app\admin\controller;
 
 use app\admin\model\AdminUser;
+use app\admin\service\AdminUserService;
 use think\Request;
 use think\response\Json;
 use think\response\View;
@@ -27,14 +28,14 @@ class AuthController extends Controller
      * @param Request $request
      * @return Json|View
      */
-    public function login(Request $request, AdminUser $adminUser)
+    public function login(Request $request, AdminUserService $adminUserService)
     {
-        $param = $request->param();
 
         if ($request->isPost()) {
-            try {
-                $user = $adminUser->login($param);
+            $param = $request->param();
 
+            try {
+                $user = $adminUserService->login($param);
                 $result = $this->authLogin($user);
                 $msg    = '登录成功';
             } catch (\Exception $exception) {
@@ -49,8 +50,9 @@ class AuthController extends Controller
     }
 
 
-    public function logout()
+    public function logoutRes()
     {
 
+        echo 'wewe';
     }
 }

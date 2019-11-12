@@ -19,50 +19,11 @@ use think\facade\Db;
 trait AdminAuth
 {
 
-    /**
-     * @var string 用户ID session/cookie的key值
-     */
-    protected $uid_key;
-    /**
-     * @var string 用户登录签名 session/cookie的key值
-     */
-    protected $sign_key;
-    /**
-     * @var string 当前URL
-     */
-    protected $url;
-    /**
-     * @var string 错误信息
-     */
-    protected $error;
-
-
-    public function __construct()
-    {
-        $this->uid_key  = config('auth.uid_key') ?? 'admin_uid';
-        dump($this->uid_key);
-        $this->sign_key = config('auth.sign_key') ?? 'admin_sign';
-        $this->url      = app('http')->getNmae() . '/' . request()->controller() . '/' . request()->action();
-
-    }
-
-
     public function init(): void
     {
-        //登录验证
-        if (!in_array($this->url, $this->loginExcept, true)) {
-            if (!$this->isLogin()) {
-                throw new  HttpResponseException(unauthorized());
-            }
-            //超级管理员不验证权限
-            if ($this->user->id !== 1 && !$this->authCheck($this->user, $this->url)) {
-                throw new  HttpResponseException(forbidden());
-            }
-        }
 
-        if ((int)request()->param('check_auth') === 1) {
-            throw new  HttpResponseException(success());
-        }
+        //登录验证
+
 
     }
 
@@ -73,8 +34,6 @@ trait AdminAuth
      */
     protected function isLogin(): ?bool
     {
-        dump($this->uid_key);
-
         try {
             $user_id = session($this->uid_key);
             //如果有session，返回true即可
@@ -102,7 +61,7 @@ trait AdminAuth
 
     /**
      * 获取sign
-     * @param AdminUser $user
+     * @param AdminUser|mixed $user
      * @return string
      */
     protected function getSign($user): string

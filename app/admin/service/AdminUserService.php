@@ -32,13 +32,27 @@ class AdminUserService extends Service
 
     /**
      * 用户登录
-     * @param string $username 用户名
-     * @param string $password 密码
-     * @return bool
+     * @param $param
+     * @param int $remember
+     * @return array|\think\Model|null
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \tools\AppException
      */
     public function login($param, $remember = 0)
     {
-
+        $username = $param['username'];
+        $password = $param['password'];
+        $user     = $this->adminUser->where('user_name', $username)->find();
+        if (!$user) {
+            exception('用户不存在');
+        }
+        $verify = password_verify($password, base64_decode($user->password));
+        if ($verify) {
+            exception('密码错误');
+        }
+        return $user;
     }
 
 

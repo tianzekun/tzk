@@ -1,0 +1,47 @@
+
+<div id="browser_warning" style="display: none">
+    <div class=" margin text-center">
+        <p class="text-red ">请使用现代浏览器(谷歌浏览器、360极速或其他国产浏览器极速模式)操作本后台！</p>
+        <a class="btn btn-success" target="_blank" href="https://www.google.cn/chrome/" data-toggle="tooltip"
+           title="点击去下载谷歌浏览器">谷歌浏览器</a>
+        <a class="btn btn-success" target="_blank" href="https://browser.360.cn/ee/index.html" data-toggle="tooltip"
+           title="点击去下载360极速浏览器">360极速浏览器</a>
+        <a class="btn btn-success" target="_blank" href="https://browser.qq.com/" title="点击去下载QQ浏览器"
+           data-toggle="tooltip">QQ浏览器</a>
+    </div>
+</div>
+
+<script>
+
+    //检查浏览器
+    checkBrowser();
+
+    /**
+     * 检查是否为古代浏览器
+     */
+    function checkBrowser() {
+        if (isIE()) {
+            if(adminDebug){
+                console.log('古代浏览器');
+            }
+            layer.open({
+                type: 1,
+                content: $('#browser_warning').html(),
+                icon: 5,
+                title: '警告',
+                area: ['500px', '300px'],
+                closeBtn: 0,
+                moveType: 1,
+                resize: false
+            });
+        } else {
+            if(adminDebug){
+                console.log('现代浏览器');
+            }
+        }
+    }
+
+    function isIE() {
+        return !!window.ActiveXObject || "ActiveXObject" in window;
+    }
+</script>

@@ -7,6 +7,7 @@ namespace app\admin\controller;
 use app\admin\model\AdminUser;
 use app\admin\traits\AdminAuth;
 use think\exception\HttpResponseException;
+use think\Http;
 
 class Controller
 {
@@ -30,8 +31,29 @@ class Controller
      */
     protected $authExcept = [];
 
+    /**
+     * @var string 用户ID session/cookie的key值
+     */
+    protected $uid_key;
+    /**
+     * @var string 用户登录签名 session/cookie的key值
+     */
+    protected $sign_key;
+    /**
+     * @var string 当前URL
+     */
+    protected $url;
+    /**
+     * @var string 错误信息
+     */
+    protected $error;
+
     public function __construct()
     {
+        $this->uid_key  = config('auth.uid_key') ?? 'admin_uid';
+        $this->sign_key = config('auth.sign_key') ?? 'admin_sign';
+        $this->url      =app('http')->getName()  . '/' . parse_name(request()->controller()) . '/' . parse_name(request()->action());
+
         //初始化
         $this->init();
     }

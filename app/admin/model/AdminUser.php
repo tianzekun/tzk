@@ -4,11 +4,13 @@
  * @author yupoxiong<i@yufuping.com>
  */
 
-declare (strict_types = 1);
+declare (strict_types=1);
 
 namespace app\admin\model;
 
+use Exception;
 use think\model\concern\SoftDelete;
+use think\model\relation\HasMany;
 
 /**
  * @property int id ID
@@ -35,46 +37,66 @@ class AdminUser extends Model
         1, 2
     ];
 
-
-    public static function init()
+    /**
+     * 新增前处理密码
+     * @param AdminUser $model
+     * @return mixed|void
+     */
+    public static function onBeforeInsert($model)
     {
-        //添加自动加密密码
-        self::event('before_insert', static function ($data) {
-            $data->password = base64_encode(password_hash($data->password, 1));
-        });
-
-        //修改密码自动加密
-        self::event('before_update', function ($data) {
-            $old = (new static())::get($data->id);
-            if ($data->password !== $old->password) {
-                $data->password = base64_encode(password_hash($data->password, 1));
-            }
-        });
+        $model->password = base64_encode(password_hash($model->password, 1));
     }
 
-    //关联操作日志
-    public function adminLog()
+    /**
+     * 更新前处理密码
+     * @param AdminUser $model
+     * @return mixed|void
+     */
+    public static function onBeforeUpdate($model)
     {
-        return $this->hasMany(AdminLog::class, 'admin_user_id', 'id');
+        $old = (new static())->find($model->id);
+        if ($model->password !== $old->password) {
+            $model->password = base64_encode(password_hash($model->password, 1));
+        }
     }
 
+    /**
+     * @return HasMany
+     */
+    public function adminLog(): HasMany
+    {
+        return $this->hasMany(AdminLog::class);
+    }
 
-    //角色获取器
-    protected function getRoleAttr($value)
+    /**
+     * 角色获取器
+     * @param $value
+     * @return array
+     */
+    protected function getRoleAttr($value): array
     {
         return explode(',', $value);
     }
 
-    //角色修改器
-    protected function setRoleAttr($value)
+    /**
+     * 角色修改器
+     * @param $value
+     * @return string
+     */
+    protected function setRoleAttr($value): string
     {
         return implode(',', $value);
     }
 
-    //用户角色名称
-    protected function getRoleTextAttr($value, $data)
+    /**
+     * 用户角色名称
+     * @param $value
+     * @param $data
+     * @return array
+     */
+    protected function getRoleTextAttr($value, $data): array
     {
-        return AdminRole::where('id', 'in', $data['role'])->column('id,name', 'id');
+        return (new AdminRole)->whereIn('id', $data['role'])->column('id,name', 'id');
     }
 
 
@@ -84,57 +106,73 @@ class AdminUser extends Model
      * @param $data
      * @return array
      */
-    protected function getAuthUrlAttr($value, $data)
+    protected function getAuthUrlAttr($value, $data): array
     {
-        $role_urls  = AdminRole::where('id', 'in', $data['role'])->where('status', 1)->column('url');
+        $role_urls  = (new AdminRole)->whereIn('id', $data['role'])->where('status', 1)->column('url');
         $url_id_str = '';
         foreach ($role_urls as $key => $val) {
-            $url_id_str .= $key == 0 ? $val : ',' . $val;
+            $url_id_str .= $key === 0 ? $val : ',' . $val;
         }
         $url_id   = array_unique(explode(',', $url_id_str));
         $auth_url = [];
         if (count($url_id) > 0) {
-            $auth_url = AdminMenu::where('id', 'in', $url_id)->column('url');
+            $auth_url = (new AdminMenu)->whereIn('id', $url_id)->column('url');
         }
         return $auth_url;
     }
 
-    //加密字符串，用在登录的时候加密处理
-    protected function getSignStrAttr($value, $data)
+    /**
+     * 加密字符串，用在登录的时候加密处理
+     * @param $value
+     * @param $data
+     * @return string
+     */
+    protected function getSignStrAttr($value, $data): string
     {
         $ua = request()->header('user-agent');
         return sha1($data['id'] . $data['username'] . $ua);
     }
 
-    //获取当前用户已授权的显示菜单
-    public function getShowMenu()
+    /**
+     * 获取当前用户已授权的显示菜单
+     * @return array
+     */
+    public function getShowMenu(): array
     {
         if ($this->id === 1) {
-            return AdminMenu::where('is_show', 1)->order('sort_id', 'asc')->order('id', 'asc')->column('id,parent_id,name,url,icon,sort_id', 'id');
+            return (new AdminMenu)->where('is_show', 1)
+                ->order('sort_id', 'asc')
+                ->order('id', 'asc')
+                ->column('id,parent_id,name,url,icon,sort_id', 'id');
         }
 
-        $role_urls = AdminRole::where('id', 'in', $this->role)->where('status', 1)->column('url');
+        $role_urls = (new AdminRole)->whereIn('id', $this->role)
+            ->where('status', 1)
+            ->column('url');
 
         $url_id_str = '';
         foreach ($role_urls as $key => $val) {
-            $url_id_str .= $key == 0 ? $val : ',' . $val;
+            $url_id_str .= $key === 0 ? $val : ',' . $val;
         }
 
         $url_id = array_unique(explode(',', $url_id_str));
-        return AdminMenu::where('id', 'in', $url_id)->where('is_show', 1)->order('sort_id', 'asc')->order('id', 'asc')->column('id,parent_id,name,url,icon,sort_id', 'id');
+        return (new AdminMenu)->whereIn('id', $url_id)->where('is_show', 1)
+            ->order('sort_id', 'asc')
+            ->order('id', 'asc')
+            ->column('id,parent_id,name,url,icon,sort_id', 'id');
     }
 
     /**
      * 用户登录
      * @param $param
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
-    public  function login($param)
+    public function login($param)
     {
         $username = $param['username'];
         $password = $param['password'];
-        $user = $this->where('user_name', $username)->find();
+        $user     = $this->where('user_name', $username)->find();
         if (!$user) {
             exception('用户不存在');
         }
