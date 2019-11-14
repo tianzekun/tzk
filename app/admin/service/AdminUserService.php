@@ -33,14 +33,13 @@ class AdminUserService extends Service
     /**
      * 用户登录
      * @param $param
-     * @param int $remember
      * @return array|\think\Model|null
      * @throws \think\db\exception\DataNotFoundException
      * @throws \think\db\exception\DbException
      * @throws \think\db\exception\ModelNotFoundException
-     * @throws \tools\AppException
+     * @throws \utils\AppException
      */
-    public function login($param, $remember = 0)
+    public function login($param)
     {
         $username = $param['username'];
         $password = $param['password'];
@@ -54,8 +53,6 @@ class AdminUserService extends Service
         }
         return $user;
     }
-
-
 
 
 

@@ -1,6 +1,6 @@
 <?php
 
-declare (strict_types = 1);
+declare (strict_types=1);
 
 namespace app\admin\controller;
 
@@ -21,7 +21,7 @@ class Controller
     /**
      * @var int 当前用户ID
      */
-    protected $user_id;
+    protected $uid;
     /**
      * @var array 无需登录即可访问的URL，请在子类中配置
      */
@@ -50,17 +50,35 @@ class Controller
 
     public function __construct()
     {
-        $this->uid_key  = config('auth.uid_key') ?? 'admin_uid';
-        $this->sign_key = config('auth.sign_key') ?? 'admin_sign';
-        $this->url      =app('http')->getName()  . '/' . parse_name(request()->controller()) . '/' . parse_name(request()->action());
-
         //初始化
         $this->init();
     }
 
+    /**
+     * 初始化方法
+     */
+    protected function init(): void
+    {
+        $app_name   = app('http')->getName();
+        $controller = parse_name(request()->controller());
+        $action     = parse_name(request()->action());
+        $this->url  = $app_name . '/' . $controller . '/' . $action;
+        if (!in_array($this->url, $this->loginExcept, true)) {
+            if (!$this->isLogin()) {
+                unauthorized();
+            }
+        }
+
+        if(!in_array($this->url, $this->authExcept, true)){
+            $check  = $this->authCheck($this->user,$this->url);
+            if(!$check){
+                forbidden();
+            }
+        }
 
 
 
+    }
 
 
 }

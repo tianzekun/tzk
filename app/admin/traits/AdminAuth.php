@@ -13,20 +13,11 @@ use app\admin\model\AdminLogData;
 use app\admin\model\AdminMenu;
 use app\admin\model\AdminRole;
 use app\admin\model\AdminUser;
-use think\exception\HttpResponseException;
+
 use think\facade\Db;
 
 trait AdminAuth
 {
-
-    public function init(): void
-    {
-
-        //登录验证
-
-
-    }
-
 
     /**
      * 是否登录
@@ -150,7 +141,7 @@ trait AdminAuth
     protected function getUserAuthUrl($user): array
     {
 
-        $role_urls = (new \app\admin\model\AdminRole)
+        $role_urls = (new AdminRole)
             ->whereIn('id', $user->role)
             ->where('status', 1)
             ->column('url');
@@ -162,7 +153,7 @@ trait AdminAuth
         $url_id   = array_unique(explode(',', $url_id_str));
         $auth_url = [];
         if (count($url_id) > 0) {
-            $auth_url = AdminMenu::whereIn('id', $url_id)->column('url');
+            $auth_url = (new AdminMenu)->whereIn('id', $url_id)->column('url');
         }
         return $auth_url;
     }

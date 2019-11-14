@@ -7,7 +7,7 @@
 declare (strict_types = 1);
 
 use think\response\Json;
-use tools\AppException;
+use utils\AppException;
 
 if (!function_exists('success')) {
     /**
