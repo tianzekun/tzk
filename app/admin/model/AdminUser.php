@@ -172,12 +172,12 @@ class AdminUser extends Model
     {
         $username = $param['username'];
         $password = $param['password'];
-        $user     = $this->where('user_name', $username)->find();
+        $user     = $this->where('username', $username)->find();
         if (!$user) {
             exception('用户不存在');
         }
         $verify = password_verify($password, base64_decode($user->password));
-        if ($verify) {
+        if (!$verify) {
             exception('密码错误');
         }
         return $user;

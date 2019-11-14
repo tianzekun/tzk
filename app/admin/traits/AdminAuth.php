@@ -14,10 +14,83 @@ use app\admin\model\AdminMenu;
 use app\admin\model\AdminRole;
 use app\admin\model\AdminUser;
 
+use think\exception\HttpResponseException;
 use think\facade\Db;
 
 trait AdminAuth
 {
+
+    /**
+     * @var string 用户ID session/cookie的key值
+     */
+    protected $uid_key;
+    /**
+     * @var string 用户登录签名 session/cookie的key值
+     */
+    protected $sign_key;
+    /**
+     * @var string 当前URL
+     */
+    protected $url;
+    /**
+     * @var string 错误信息
+     */
+    protected $error;
+
+
+    /**
+     * 初始化方法
+     */
+    protected function authInit(): void
+    {
+        //初始化uid和sign的key
+        $this->uid_key  = config('admin.auth.uid_key') ?? 'admin_uid';
+        $this->sign_key = config('admin.auth.sign_key') ?? 'admin_sign';
+
+        //获取当前的url
+        $app_name   = strtolower(app('http')->getName());
+        $controller = parse_name(request()->controller());
+        $action     = strtolower(request()->action());
+        $this->url  = $app_name . '/' . $controller . '/' . $action;
+
+        //登录排除URL处理
+
+        //检查登录
+        if (!in_array($this->url, $this->parseUrl($this->loginExcept), true)) {
+            if (!$this->isLogin()) {
+                throw new HttpResponseException(redirect('/admin/auth/login'));
+            }
+
+            //检查权限
+            if (!in_array($this->url, $this->parseUrl($this->authExcept), true)) {
+                $check = $this->authCheck($this->user, $this->url);
+                if (!$check) {
+                    throw new HttpResponseException(forbidden());
+                }
+            }
+        }
+
+    }
+
+    /**
+     * 转换url为统一格式，防止开发人员手误填错导致无法验证
+     * @param string|array $url
+     * @return mixed
+     */
+    protected function parseUrl($url)
+    {
+        if (is_string($url)) {
+            $tmp_arr = explode('/', $url);
+            $url     = strtolower($tmp_arr[0] ?? '') . '/' . parse_name($tmp_arr[1] ?? '') . '/' . strtolower($tmp_arr[2] ?? '');
+        } else if (count($url) > 0) {
+            foreach ($url as $key => $value) {
+                $tmp_arr   = explode('/', $value);
+                $url[$key] = strtolower($tmp_arr[0] ?? '') . '/' . parse_name($tmp_arr[1] ?? '') . '/' . strtolower($tmp_arr[2] ?? '');
+            }
+        }
+        return $url;
+    }
+
 
     /**
      * 是否登录
@@ -100,7 +173,7 @@ trait AdminAuth
      */
     public function authCheck($user, $url): bool
     {
-        return in_array($url, $this->authExcept, true) || in_array($url, $this->getUserAuthUrl($user), true);
+        return in_array($url, $this->getUserAuthUrl($user), true);
     }
 
     /**
@@ -140,7 +213,6 @@ trait AdminAuth
      */
     protected function getUserAuthUrl($user): array
     {
-
         $role_urls = (new AdminRole)
             ->whereIn('id', $user->role)
             ->where('status', 1)
@@ -155,6 +227,6 @@ trait AdminAuth
         if (count($url_id) > 0) {
             $auth_url = (new AdminMenu)->whereIn('id', $url_id)->column('url');
         }
-        return $auth_url;
+        return $this->parseUrl($auth_url);
     }
 }

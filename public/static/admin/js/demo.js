@@ -109,7 +109,7 @@ $(function () {
      * @returns void
      */
     function setup() {
-        var tmp = get('skin');
+        let tmp = get('skin');
         if (tmp && $.inArray(tmp, mySkins))
             changeSkin(tmp);
 

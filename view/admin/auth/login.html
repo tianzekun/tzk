@@ -14,14 +14,29 @@
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
     <script>
+        //是否开启后台debug
         const adminDebug = {$debug};
     </script>
-    <link rel="stylesheet" href="../../../public/static/admin/plugins/bootstrap/css/bootstrap.min.css">
+
+    <!--引入js-->
+    {js href="__PLUGINS__/jquery/jquery.min.js" /}
+    {js href="__PLUGINS__/bootstrap/js/bootstrap.min.js" /}
+    {js href="__PLUGINS__/jquery-validation/jquery.validate.min.js" /}
+    {js href="__PLUGINS__/jquery-validation/localization/messages_zh.min.js" /}
+    {js href="__PLUGINS__/layer/layer.js" /}
+    {js href="__JS__/admin.js" /}
+    <!--引入浏览器检查试图-->
+    {include file='common/check_browser'}
+
+    <!--是否开启背景-->
+    {if $login_config.background}
+    {include file='auth/background' /}
+    {/if}
 </head>
 <body class="hold-transition login-page">
 <div class="login-box">
     <div class="login-logo">
-        <a>{$admin.name|default=''}</a>
+        <a>{$admin.name|default='后台系统登录'}</a>
     </div>
     <div class="login-box-body">
         <p class="login-box-msg">登录</p>
@@ -34,11 +49,11 @@
                 <input name="password" id="password" autocomplete="off" type="password" class="form-control" placeholder="密码">
                 <span class="glyphicon glyphicon-lock form-control-feedback"></span>
             </div>
-
+            <!--登录token验证-->
             {if  $login_config.token}
-            {:token()}
+            {:token_field()}
             {/if}
-
+            <!--登录验证方式：1为图形验证码，2为极验滑动验证-->
             {if  $login_config.captcha==1}
             {include file='auth/captcha' /}
             {else/}
@@ -56,20 +71,40 @@
                     </div>
                 </div>
                 <div class="col-xs-4">
-                    {:token()}
+
                     <button type="submit" id="loginButton" class="btn btn-primary btn-block btn-flat">登录</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
-{js href="__ADMIN_PLUGINS__/jquery/jquery.min.js" /}
-{js href="__ADMIN_PLUGINS__/bootstrap/js/bootstrap.min.js" /}
-{js href="__ADMIN_PLUGINS__/jquery-validation/jquery.validate.min.js" /}
-{js href="__ADMIN_PLUGINS__/jquery-validation/localization/messages_zh.min.js" /}
-{js href="__ADMIN_PLUGINS__/layer/layer.js" /}
-{js href="__ADMIN_JS__/admin.js" /}
-
-{include file='common/check_browser'}
 </body>
+<script>
+    $(document).ready(function () {
+        $("#dataForm").validate({
+            rules: {
+                username: {
+                    required: true,
+                    minlength: 2
+                },
+                password: {
+                    required: true,
+                    minlength: 6
+                },
+            },
+            messages: {
+                username: {
+                    required: "请输入用户名",
+                    minlength: "用户名长度不能小于2"
+                },
+                password: {
+                    required: "请输入密码",
+                    minlength: "密码长度不能小于6"
+                },
+            }
+        });
+        $('#username').focus();
+
+    });
+</script>
 </html>

@@ -8,6 +8,7 @@ use app\common\model\SettingGroup;
 use think\exception\HttpResponseException;
 use think\Response;
 use think\response\Redirect;
+use utils\AppException;
 
 if (!function_exists('success')) {
 
@@ -148,5 +149,34 @@ EOF;
         }
 
         return $result ? true : false;
+    }
+}
+
+if(!function_exists('exception')){
+    /**
+     * 抛出异常
+     * @param string $msg 错误信息
+     * @throws AppException
+     */
+    function exception($msg='error')
+    {
+        throw new AppException($msg);
+    }
+}
+
+if (!function_exists('format_size')) {
+    /**
+     * 格式化文件大小单位
+     * @param $size
+     * @param string $delimiter
+     * @return string
+     */
+    function format_size($size, $delimiter = '')
+    {
+        $units = array('B', 'KB', 'MB', 'GB', 'TB', 'PB');
+        for ($i = 0; $size >= 1024 && $i < 5; $i++) {
+            $size /= 1024;
+        }
+        return round($size, 2) . $delimiter . $units[$i];
     }
 }

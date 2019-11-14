@@ -1,3 +1,6 @@
+
+let $body = $('body');
+
 try {
     /** pjax相关 */
     //超时3秒(可选)
@@ -45,7 +48,9 @@ $(document).on('submit', '.searchForm', function (event) {
     $.pjax.submit(event, '#pjax-container');
 });
 
-
+/**
+ * 菜单相关js
+ */
 //菜单搜索
 $(function () {
     $('#sidebar-form').on('submit', function (e) {
@@ -55,7 +60,7 @@ $(function () {
     $('.sidebar-menu li.active').data('lte.pushmenu.active', true);
 
     $('#search-input').on('keyup', function () {
-        var term = $('#search-input').val().trim();
+        let term = $('#search-input').val().trim();
 
         if (term.length === 0) {
             $('.sidebar-menu li').each(function () {
@@ -84,7 +89,7 @@ $(function () {
                     $(this).addClass('active');
                 }
 
-                var parent = $(this).parents('li').first();
+                let parent = $(this).parents('li').first();
                 if (parent.is('.treeview')) {
                     parent.show(0);
                 }
@@ -104,7 +109,7 @@ $(function () {
 //点击菜单高亮
 $(function () {
     $('.sidebar-menu li:not(.treeview) > a').on('click', function () {
-        var $parent = $(this).parent().addClass('active');
+        let $parent = $(this).parent().addClass('active');
         $parent.siblings('.treeview.active').find('> a').trigger('click');
         $parent.siblings().removeClass('active').find('li').removeClass('active');
     });
@@ -148,13 +153,13 @@ function clearSearchForm() {
 
 $(function () {
     /* 返回按钮 */
-    $('body').on('click', '.BackButton', function (event) {
+    $body.on('click', '.BackButton', function (event) {
         event.preventDefault();
         history.back(1);
     });
 
     /* 刷新按钮 */
-    $('body').on('click', '.ReloadButton', function (event) {
+    $body.on('click', '.ReloadButton', function (event) {
         event.preventDefault();
         $.pjax.reload();
     });
@@ -164,7 +169,7 @@ $(function () {
 
 /*列表中单个选择和取消*/
 function checkThis(obj) {
-    var id = $(obj).attr('value');
+    let id = $(obj).attr('value');
     if ($(obj).is(':checked')) {
         if ($.inArray(id, dataSelectIds) < 0) {
             dataSelectIds.push(id);
@@ -175,8 +180,8 @@ function checkThis(obj) {
         }
     }
 
-    var all_length = $("input[name='data-checkbox']").length;
-    var checked_length = $("input[name='data-checkbox']:checked").length;
+    let all_length = $("input[name='data-checkbox']").length;
+    let checked_length = $("input[name='data-checkbox']:checked").length;
     if (all_length === checked_length) {
         $("#dataCheckAll").prop("checked", true);
     } else {
@@ -188,7 +193,7 @@ function checkThis(obj) {
 /*全部选择/取消*/
 function checkAll(obj) {
     dataSelectIds = [];
-    var all_check = $("input[name='data-checkbox']");
+    let all_check = $("input[name='data-checkbox']");
     if ($(obj).is(':checked')) {
         all_check.prop("checked", true);
         $(all_check).each(function () {
@@ -304,25 +309,25 @@ $(function () {
             console.log('AjaxButton clicked.');
         }
         //是否弹出提示
-        var layerConfirm = $(this).data("confirm") || 1;
+        let layerConfirm = $(this).data("confirm") || 1;
         //访问方式，1为直接访问，2为layer窗口显示
-        var layerType = parseInt($(this).data("type") || 1);
+        let layerType = parseInt($(this).data("type") || 1);
         //访问的url
-        var url = $(this).data("url");
+        let url = $(this).data("url");
         //访问方式，默认post
-        var layerMethod = $(this).data("method") || 'post';
+        let layerMethod = $(this).data("method") || 'post';
         //访问成功后跳转的页面，不设置此参数默认根据后台返回的url跳转
-        var go = $(this).data("go") || 'url://reload';
+        let go = $(this).data("go") || 'url://reload';
 
         //当为窗口显示时可定义宽度和高度
-        var layerWith = $(this).data("width") || '80%';
-        var layerHeight = $(this).data("height") || '60%';
+        let layerWith = $(this).data("width") || '80%';
+        let layerHeight = $(this).data("height") || '60%';
 
         //窗口的标题
-        var layerTitle = $(this).data('title');
+        let layerTitle = $(this).data('title');
 
         //当前操作数据的ID
-        var dataId = $(this).data("id");
+        let dataId = $(this).data("id");
 
         //如果没有定义ID去查询data-data属性
         if (dataId === undefined) {
@@ -335,7 +340,7 @@ $(function () {
                 }
                 dataId = dataSelectIds;
             }
-            dataData = {"id": dataId};
+             dataData = {"id": dataId};
         }
 
         if (typeof (dataData) != 'object') {
@@ -400,7 +405,7 @@ $(function () {
  * @param go 要跳转的url
  */
 function ajaxRequest(url, method, data, go) {
-    var loadT = layer.msg('正在请求,请稍候…', {icon: 16, time: 0, shade: [0.3, '#000']});
+    let loadT = layer.msg('正在请求,请稍候…', {icon: 16, time: 0, shade: [0.3, '#000']});
     $.ajax({
             url: url,
             dataType: 'json',
@@ -415,10 +420,10 @@ function ajaxRequest(url, method, data, go) {
                 if (adminDebug) {
                     console.log('request success!');
                     if (result.code === 1) {
-                        console.log('%cresult success', ';color:#00a65a');
+                        console.log('%c result success', ';color:#00a65a');
                     } else {
                         go = 'url://current';
-                        console.log('%cresult fail', ';color:#f39c12');
+                        console.log('%c result fail', ';color:#f39c12');
                     }
                 }
 
@@ -427,7 +432,7 @@ function ajaxRequest(url, method, data, go) {
             error: function (xhr, type, errorThrown) {
                 //异常处理；
                 if (adminDebug) {
-                    console.log('%crequest fail!', ';color:#dd4b39');
+                    console.log('%c request fail!', ';color:#dd4b39');
                     console.log();
                     console.log("type:" + type + ",readyState:" + xhr.readyState + ",status:" + xhr.status);
                     console.log("url:" + url);
@@ -455,8 +460,8 @@ function changePerPage(obj) {
  * 检查授权
  */
 function checkAuth(url) {
-    var hasAuth = false;
-    var loadT = layer.msg('正在请求,请稍候…', {icon: 16, time: 0, shade: [0.3, '#000']});
+    let hasAuth = false;
+    let loadT = layer.msg('正在请求,请稍候…', {icon: 16, time: 0, shade: [0.3, '#000']});
     $.post({
         url: url,
         data: {"check_auth": 1},
@@ -481,12 +486,12 @@ function checkAuth(url) {
 
 /** 处理url参数 **/
 function parseParam(param, key) {
-    var paramStr = "";
+    let paramStr = "";
     if (param instanceof String || param instanceof Number || param instanceof Boolean) {
         paramStr += "&" + key + "=" + encodeURIComponent(param);
     } else {
         $.each(param, function (i) {
-            var k = key == null ? i : key + (param instanceof Array ? "[" + i + "]" : "." + i);
+            let k = key == null ? i : key + (param instanceof Array ? "[" + i + "]" : "." + i);
             paramStr += '&' + parseParam(this, k);
         });
     }
@@ -495,8 +500,8 @@ function parseParam(param, key) {
 
 /** 导出excel **/
 function exportData(url) {
-    var exportUrl = url || 'index.html';
-    var openUrl = exportUrl + '?export_data=1&' + $("#searchForm").serialize();
+    let exportUrl = url || 'index.html';
+    let openUrl = exportUrl + '?export_data=1&' + $("#searchForm").serialize();
     window.open(openUrl);
 
 }

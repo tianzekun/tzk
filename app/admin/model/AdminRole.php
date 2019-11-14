@@ -8,6 +8,14 @@ declare (strict_types = 1);
 
 namespace app\admin\model;
 
+use think\Model;
+
+/**
+ * Class AdminRole
+ * @package app\admin\model
+ * @property int $id
+ * @property array|string $url
+ */
 class AdminRole extends Model
 {
     protected $name = 'admin_role';
@@ -23,13 +31,15 @@ class AdminRole extends Model
         1
     ];
 
-    public static function init()
+    /**
+     * @param AdminRole $model
+     * @return mixed|void
+     */
+    public static function onBeforeInsert($model)
     {
-        //添加首页，系统管理，个人资料菜单/权限
-        self::event('before_insert', static function ($data) {
-            $data->url = [1,2,18];
-        });
+        $model->url = [1,2,18];
     }
+
 
     protected function getUrlAttr($value)
     {

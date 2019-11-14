@@ -6,10 +6,14 @@ namespace tools;
  */
 class GeeTest
 {
-    const GT_SDK_VERSION = 'php_3.0.0';
+    public const GT_SDK_VERSION = 'php_3.0.0';
 
-    public static $connectTimeout = 1;
-    public static $socketTimeout = 1;
+    public static $connectTimeout = 3;
+    public static $socketTimeout = 3;
+
+    protected $captcha_id;
+    protected $private_key;
+    protected $domain;
 
     private $response;
 
@@ -23,10 +27,12 @@ class GeeTest
     /**
      * 判断极验服务器是否down机
      *
-     * @param array $data
+     * @param $param
+     * @param int $new_captcha
      * @return int
+     * @throws \Exception
      */
-    public function preProcess($param, $new_captcha = 1)
+    public function preProcess($param, $new_captcha = 1): int
     {
         $data      = [
             'gt'          => $this->captcha_id,
@@ -36,7 +42,7 @@ class GeeTest
         $query     = http_build_query($data);
         $url       = $this->domain . '/register.php?' . $query;
         $challenge = $this->sendRequest($url);
-        if (strlen($challenge) != 32) {
+        if (strlen($challenge) !== 32) {
             $this->failBackProcess();
             return 0;
         }
@@ -47,7 +53,7 @@ class GeeTest
     /**
      * @param $challenge
      */
-    private function successProcess($challenge)
+    private function successProcess($challenge): void
     {
         $challenge      = md5($challenge . $this->private_key);
         $result         = array(
@@ -60,10 +66,13 @@ class GeeTest
     }
 
 
-    private function failBackProcess()
+    /**
+     * @throws \Exception
+     */
+    private function failBackProcess(): void
     {
-        $rnd1           = md5(rand(0, 100));
-        $rnd2           = md5(rand(0, 100));
+        $rnd1           = md5(random_int(0, 100));
+        $rnd2           = md5(random_int(0, 100));
         $challenge      = $rnd1 . substr($rnd2, 0, 2);
         $result         = array(
             'success'     => 0,
@@ -99,9 +108,10 @@ class GeeTest
      * @param string $validate
      * @param string $seccode
      * @param array $param
+     * @param int $json_format
      * @return int
      */
-    public function successValidate($challenge, $validate, $seccode, $param, $json_format = 1)
+    public function successValidate($challenge, $validate, $seccode, $param, $json_format = 1): int
     {
         if (!$this->checkValidate($challenge, $validate)) {
             return 0;
@@ -116,12 +126,12 @@ class GeeTest
         );
         $query        = array_merge($query, $param);
         $url          = $this->domain . '/validate.php';
-        $codevalidate = $this->postRequest($url, $query);
-        $obj          = json_decode($codevalidate, true);
+        $code_validate = $this->postRequest($url, $query);
+        $obj          = json_decode($code_validate, true);
         if ($obj === false) {
             return 0;
         }
-        if ($obj['seccode'] == md5($seccode)) {
+        if ($obj['seccode'] === md5($seccode)) {
             return 1;
         }
         return 0;
@@ -134,9 +144,9 @@ class GeeTest
      * @param $validate
      * @return int
      */
-    public function failValidate($challenge, $validate)
+    public function failValidate($challenge, $validate): int
     {
-        if (md5($challenge) == $validate) {
+        if (md5($challenge) === $validate) {
             return 1;
         }
 
@@ -148,9 +158,9 @@ class GeeTest
      * @param $validate
      * @return bool
      */
-    private function checkValidate($challenge, $validate)
+    private function checkValidate($challenge, $validate): bool
     {
-        if (strlen($validate) != 32) {
+        if (strlen($validate) !== 32) {
             return false;
         }
         if (md5($this->private_key . 'geetest' . $challenge) != $validate) {
@@ -180,24 +190,24 @@ class GeeTest
             curl_close($ch);
             if ($curl_errno > 0) {
                 return 0;
-            } else {
-                return $data;
-            }
-        } else {
-            $opts    = array(
-                'http' => array(
-                    'method'  => 'GET',
-                    'timeout' => self::$connectTimeout + self::$socketTimeout,
-                )
-            );
-            $context = stream_context_create($opts);
-            $data    = @file_get_contents($url, false, $context);
-            if ($data) {
-                return $data;
             }
 
-            return 0;
+            return $data;
         }
+
+        $opts    = array(
+            'http' => array(
+                'method'  => 'GET',
+                'timeout' => self::$connectTimeout + self::$socketTimeout,
+            )
+        );
+        $context = stream_context_create($opts);
+        $data    = @file_get_contents($url, false, $context);
+        if ($data) {
+            return $data;
+        }
+
+        return 0;
     }
 
     /**
@@ -257,7 +267,7 @@ class GeeTest
     /**
      * @param $err
      */
-    private function triggerError($err)
+    private function triggerError($err): void
     {
         trigger_error($err);
     }
