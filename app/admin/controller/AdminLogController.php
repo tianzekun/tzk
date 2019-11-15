@@ -24,7 +24,12 @@ class AdminLogController extends Controller
                 }
             })
             ->scope('where', $param)
-            ->paginate($this->admin['per_page'], false, ['query'=>$request->get()]);
+            ->paginate(
+                [
+                    'list_rows'=> $this->admin['per_page'],
+                    'var_page' => 'page',
+                    'query'=>$request->get()
+                ]);
 
         //关键词，排序等赋值
         $this->assign($request->get());
@@ -33,7 +38,7 @@ class AdminLogController extends Controller
             'data'  => $data,
             'page'  => $data->render(),
             'total' => $data->total(),
-            'admin_user_list' => AdminUser::all(),
+            'admin_user_list' => AdminUser::select(),
         ]);
 
         return $this->fetch();
@@ -42,7 +47,7 @@ class AdminLogController extends Controller
     //日志详情
     public function view($id,AdminLog $model)
     {
-        $data = $model::get($id);
+        $data = $model::find($id);
         $this->assign([
             'data'=>$data
         ]);

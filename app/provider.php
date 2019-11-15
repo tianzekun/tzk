@@ -3,4 +3,5 @@
 
 // 容器Provider定义文件
 return [
+    'think\Paginator' => 'tools\BearPage'
 ];

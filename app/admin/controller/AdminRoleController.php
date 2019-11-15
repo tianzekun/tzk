@@ -57,7 +57,7 @@ class AdminRoleController extends Controller
     public function edit($id, Request $request, AdminRole $model, AdminRoleValidate $validate)
     {
 
-        $data = $model::get($id);
+        $data = $model::find($id);
         if ($request->isPost()) {
             $param           = $request->param();
             $validate_result = $validate->scene('edit')->check($param);

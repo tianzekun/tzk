@@ -53,8 +53,6 @@ class Controller
         if ((int)request()->param('check_auth') === 1) {
             success();
         }
-
-
         //记录日志
         $menu = AdminMenu::where('url' ,'=', $this->url)->find();
         if ($menu) {
